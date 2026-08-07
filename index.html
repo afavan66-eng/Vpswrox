@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Bot Hosting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0e17;
+            color: #e6edf3;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #58a6ff, #3fb950);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #30363d;
+            padding: 40px;
+            text-align: center;
+            border-radius: 12px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #58a6ff;
+            background: rgba(88, 166, 255, 0.05);
+        }
+        .upload-area input {
+            display: none;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary {
+            background: #238636;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+        .btn-danger {
+            background: #da3633;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #f85149;
+        }
+        .btn-warning {
+            background: #d29922;
+            color: white;
+        }
+        .btn-warning:hover {
+            background: #e3b341;
+        }
+        .btn-secondary {
+            background: #30363d;
+            color: #e6edf3;
+        }
+        .btn-secondary:hover {
+            background: #424a53;
+        }
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .message-success {
+            background: #0d4429;
+            color: #3fb950;
+        }
+        .message-error {
+            background: #44220d;
+            color: #f85149;
+        }
+        .bot-item {
+            background: #0d1117;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #30363d;
+        }
+        .bot-item.running {
+            border-left-color: #3fb950;
+        }
+        .bot-item.stopped {
+            border-left-color: #f85149;
+        }
+        .bot-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .bot-status {
+            font-size: 12px;
+            padding: 2px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .status-running {
+            background: #0d4429;
+            color: #3fb950;
+        }
+        .status-stopped {
+            background: #44220d;
+            color: #f85149;
+        }
+        .bot-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .empty {
+            text-align: center;
+            color: #8b949e;
+            padding: 20px;
+        }
+        .file-info {
+            color: #8b949e;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        .tag {
+            background: #1a2332;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #58a6ff;
+            display: inline-block;
+            margin: 2px;
+        }
+        .log-viewer {
+            background: #0a0e17;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            border: 1px solid #1a2332;
+            margin-top: 10px;
+        }
+        .footer {
+            text-align: center;
+            color: #8b949e;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            background: #0d1117;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-item .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+        .stat-item .label {
+            font-size: 12px;
+            color: #8b949e;
+        }
+        @media (max-width: 768px) {
+            .bot-item {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .stats {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Bot Hosting</h1>
+        
+        <!-- Stats -->
+        <div class="stats" id="stats">
+            <div class="stat-item">
+                <div class="number" id="totalBots">0</div>
+                <div class="label">Toplam Bot</div>
+            </div>
+            <div class="stat-item">
+                <div class="number" id="runningBots" style="color:#3fb950;">0</div>
+                <div class="label">Çalışan Bot</div>
+            </div>
+            <div class="stat-item">
+                <div class="number" id="cpuStat">0%</div>
+                <div class="label">CPU</div>
+            </div>
+        </div>
+
+        <!-- Upload -->
+        <div class="card">
+            <h3>📤 Bot Yükle</h3>
+            <div class="upload-area" id="uploadArea">
+                <span style="font-size:48px;display:block;margin-bottom:10px;">📁</span>
+                <p>.py dosyasını sürükle veya tıkla</p>
+                <p style="color:#8b949e;font-size:13px;">Sistem import edilen paketleri otomatik algılar</p>
+                <input type="file" id="fileInput" accept=".py">
+                <br><br>
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Dosya Seç</button>
+                <button class="btn btn-primary" onclick="upload()" id="uploadBtn" disabled>⬆️ Yükle</button>
+                <div id="fileInfo" class="file-info"></div>
+                <div id="uploadMessage" style="margin-top:10px;"></div>
+            </div>
+        </div>
+
+        <!-- Bot List -->
+        <div class="card">
+            <h3>📋 Botlarım</h3>
+            <div id="botList">
+                <div class="empty">Henüz bot yüklenmemiş</div>
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div class="card" id="logCard" style="display:none;">
+            <h3>📜 Bot Logları</h3>
+            <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                <select id="logSelect" style="flex:1;background:#0d1117;color:#e6edf3;border:1px solid #30363d;padding:8px;border-radius:6px;min-width:150px;">
+                    <option value="">Bot seç</option>
+                </select>
+                <button class="btn btn-secondary btn-sm" onclick="refreshLogs()">🔄 Yenile</button>
+                <button class="btn btn-secondary btn-sm" onclick="toggleAutoRefresh()">⏱ Otomatik</button>
+            </div>
+            <div id="logViewer" class="log-viewer">Loglar burada</div>
+        </div>
+
+        <div class="footer">
+            🤖 Otomatik paket algılama • 7/24 çalışma • Railway ile dağıtıldı
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let autoRefresh = null;
+        let autoRefreshActive = false;
+
+        // File input
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.name.endsWith('.py')) {
+                selectedFile = file;
+                document.getElementById('fileInfo').innerHTML = '✅ ' + file.name + ' (' + (file.size/1024).toFixed(2) + ' KB)';
+                document.getElementById('uploadBtn').disabled = false;
+            } else {
+                alert('Sadece .py dosyaları!');
+                this.value = '';
+            }
+        });
+
+        // Drag and drop
+        const area = document.getElementById('uploadArea');
+        area.addEventListener('dragover', e => {
+            e.preventDefault();
+            area.style.borderColor = '#58a6ff';
+        });
+        area.addEventListener('dragleave', () => {
+            area.style.borderColor = '#30363d';
+        });
+        area.addEventListener('drop', e => {
+            e.preventDefault();
+            area.style.borderColor = '#30363d';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+                document.getElementById('fileInput').dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Upload
+        async function upload() {
+            if (!selectedFile) return;
+
+            const btn = document.getElementById('uploadBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Yükleniyor...';
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('uploadMessage').innerHTML = '✅ Bot yüklendi! ID: ' + data.bot_id;
+                    if (data.requirements && data.requirements.length > 0) {
+                        document.getElementById('uploadMessage').innerHTML += '<br>📦 Paketler: ' + data.requirements.join(', ');
+                    }
+                    refreshBots();
+                } else {
+                    document.getElementById('uploadMessage').innerHTML = '❌ ' + data.error;
+                }
+            } catch (err) {
+                document.getElementById('uploadMessage').innerHTML = '❌ ' + err.message;
+            }
+
+            btn.disabled = false;
+            btn.textContent = '⬆️ Yükle';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileInfo').innerHTML = '';
+            selectedFile = null;
+        }
+
+        // Bot list
+        async function refreshBots() {
+            try {
+                const response = await fetch('/api/bots');
+                const bots = await response.json();
+
+                const list = document.getElementById('botList');
+                document.getElementById('totalBots').textContent = bots.length;
+                const running = bots.filter(b => b.status === 'running').length;
+                document.getElementById('runningBots').textContent = running;
+
+                if (bots.length === 0) {
+                    list.innerHTML = '<div class="empty">Henüz bot yüklenmemiş</div>';
+                    return;
+                }
+
+                let html = '';
+                for (const bot of bots) {
+                    const isRunning = bot.status === 'running';
+                    html += `
+                        <div class="bot-item ${isRunning ? 'running' : 'stopped'}">
+                            <div>
+                                <div class="bot-name">${bot.name}</div>
+                                <span class="bot-status ${isRunning ? 'status-running' : 'status-stopped'}">
+                                    ${isRunning ? '🟢 Çalışıyor' : '🔴 Durduruldu'}
+                                </span>
+                                ${bot.requirements && bot.requirements.length > 0 ? 
+                                    '<div style="margin-top:5px;">' + bot.requirements.map(r => `<span class="tag">${r}</span>`).join('') + '</div>' : ''}
+                            </div>
+                            <div class="bot-actions">
+                                ${isRunning ?
+                                    `<button class="btn btn-warning btn-sm" onclick="stopBot('${bot.id}')">⏹ Durdur</button>` :
+                                    `<button class="btn btn-primary btn-sm" onclick="startBot('${bot.id}')">▶ Başlat</button>`
+                                }
+                                <button class="btn btn-secondary btn-sm" onclick="showLogs('${bot.id}')">📋 Log</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteBot('${bot.id}')">🗑 Sil</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                list.innerHTML = html;
+                updateLogSelect(bots);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Bot actions
+        async function startBot(botId) {
+            try {
+                const response = await fetch(`/api/bots/${botId}/start`, { method: 'POST' });
+                const data = await response.json();
+                alert(data.message);
+                refreshBots();
+            } catch (err) {
+                alert('Hata: ' + err.message);
+            }
+        }
+
+        async function stopBot(botId) {
+            try {
+                const response = await fetch(`/api/bots/${botId}/stop`, { method: 'POST' });
+                const data = await response.json();
+                alert(data.message);
+                refreshBots();
+            } catch (err) {
+                alert('Hata: ' + err.message);
+            }
+        }
+
+        async function deleteBot(botId) {
+            if (!confirm('Bu botu silmek istediğine emin misin?')) return;
+            try {
+                const response = await fetch(`/api/bots/${botId}`, { method: 'DELETE' });
+                const data = await response.json();
+                alert(data.message);
+                refreshBots();
+            } catch (err) {
+                alert('Hata: ' + err.message);
+            }
+        }
+
+        // Logs
+        function updateLogSelect(bots) {
+            const select = document.getElementById('logSelect');
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">Bot seç</option>';
+            for (const bot of bots) {
+                select.innerHTML += `<option value="${bot.id}">${bot.name}</option>`;
+            }
+            if (currentVal && bots.find(b => b.id === currentVal)) {
+                select.value = currentVal;
+            }
+        }
+
+        function showLogs(botId) {
+            document.getElementById('logCard').style.display = 'block';
+            document.getElementById('logSelect').value = botId;
+            refreshLogs();
+        }
+
+        async function refreshLogs() {
+            const botId = document.getElementById('logSelect').value;
+            if (!botId) {
+                document.getElementById('logViewer').textContent = 'Bir bot seçin';
+                return;
+            }
+            try {
+                const response = await fetch(`/api/bots/${botId}/logs?lines=100`);
+                const data = await response.json();
+                document.getElementById('logViewer').textContent = data.logs || 'Log yok';
+                document.getElementById('logViewer').scrollTop = document.getElementById('logViewer').scrollHeight;
+            } catch (err) {
+                document.getElementById('logViewer').textContent = 'Hata: ' + err.message;
+            }
+        }
+
+        function toggleAutoRefresh() {
+            if (autoRefreshActive) {
+                clearInterval(autoRefresh);
+                autoRefreshActive = false;
+                return;
+            }
+            autoRefreshActive = true;
+            autoRefresh = setInterval(refreshLogs, 3000);
+        }
+
+        // System stats
+        async function refreshSystem() {
+            try {
+                const response = await fetch('/api/system');
+                const data = await response.json();
+                document.getElementById('cpuStat').textContent = data.cpu + '%';
+            } catch (err) {}
+        }
+
+        // Auto refresh
+        setInterval(refreshBots, 5000);
+        setInterval(refreshSystem, 10000);
+        refreshBots();
+        refreshSystem();
+    </script>
+</body>
+</html>
